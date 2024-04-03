@@ -1,3 +1,7 @@
+// Exercice 5 : 7 minutes
+// Exercice 6 : 13 minutes
+// Exercice 7 : 4 minutes
+
 import { useState } from 'react';
 
 const Todos = ({ todos }) => (
@@ -26,7 +30,16 @@ const TodoForm = ({ addTodo }) => {
   );
 };
 
-const Counter = ({ count, increment }) => {
+const useCounter = (defaultValue) => {
+  const [count, setCount] = useState(defaultValue);
+
+  const increment = () => setCount((p) => p + 1);
+
+  return { count, increment };
+};
+
+const Counter = () => {
+  const { count, increment } = useCounter(0);
   return <button onClick={increment}>{count}</button>;
 };
 
@@ -40,12 +53,7 @@ const Username = ({ username, setUsername }) => {
   );
 };
 
-// 🦁 Il faudra ajouter les props "favoriteAnimal" et "setFavoriteAnimal" ici !
-const FavoriteAnimal = () => {
-  // 🦁 Déplace ce state dans le composant "UserAnimalForm".
-  // Tu dois déplacer ce state, car c'est un composant au dessus qui a besoin
-  // De cette donnée.
-  const [favoriteAnimal, setFavoriteAnimal] = useState('Dog');
+const FavoriteAnimal = ({ favoriteAnimal, setFavoriteAnimal }) => {
   return (
     <input
       type="text"
@@ -63,40 +71,65 @@ const Greeting = ({ favoriteAnimal, username }) => {
   );
 };
 
-// 🦁 Crée un nouveau composant nommé : "UserAnimalForm".
-// Dedans tu vas avoir toute la logique par rapport à la phrase concernant
-// le username et le favorite animal.
-
-const App = () => {
-  const [todos, setTodos] = useState(['Learn React', 'Learn React Hooks']);
-  const [count, setCount] = useState(0);
-  // 🦁 Déplace ce state dans le composant "UserAnimalForm".
+const UserAnimalForm = () => {
   const [username, setUsername] = useState('');
+
+  const [favoriteAnimal, setFavoriteAnimal] = useState('Dog');
+  return (
+    <div className="vertical-stack">
+      <h2>Animal !</h2>
+      <div>
+        <span>Favorite Animal</span>
+        <FavoriteAnimal
+          favoriteAnimal={favoriteAnimal}
+          setFavoriteAnimal={setFavoriteAnimal}
+        />
+      </div>
+      <div>
+        <span>Username</span>
+        <Username username={username} setUsername={setUsername} />
+      </div>
+      <Greeting username={username} favoriteAnimal={favoriteAnimal} />
+    </div>
+  );
+};
+
+const useToDo = (defaultToDos = []) => {
+  const [todos, setTodos] = useState(defaultToDos);
 
   const addTodo = (todo) => {
     setTodos([...todos, todo]);
   };
 
+  const deleteTodo = (index) => {
+    setTodos((current) => {
+      current.splice(index, 1);
+      return [...current];
+    });
+  };
+
+  return { todos, addTodo, deleteTodo };
+};
+
+const TodoList = () => {
+  const { todos, addTodo } = useToDo(['Learn React', 'Learn React Hooks']);
+
   return (
-    <div>
+    <>
       <h2>TodoApp</h2>
       <Todos todos={todos} />
       <TodoForm addTodo={addTodo} />
+    </>
+  );
+};
+
+const App = () => {
+  return (
+    <div>
+      <TodoList />
       <h2>Counter</h2>
-      <Counter count={count} increment={() => setCount((p) => p + 1)} />
-      {/* 🦁 Déplace toute cette partie dans "UserAnimalForm" */}
-      <div className="vertical-stack">
-        <h2>Animal !</h2>
-        <div>
-          <span>Favorite Animal</span>
-          <FavoriteAnimal />
-        </div>
-        <div>
-          <span>Username</span>
-          <Username username={username} setUsername={setUsername} />
-        </div>
-        <Greeting username={username} />
-      </div>
+      <Counter />
+      <UserAnimalForm />
     </div>
   );
 };
